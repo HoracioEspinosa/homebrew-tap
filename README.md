@@ -11,30 +11,14 @@ gives you upstream engram, without the ClaroDrive cloud configuration or this fo
 brew install HoracioEspinosa/tap/engram
 ```
 
-`HoracioEspinosa/engram` is a **private** repository. Its release binaries are not reachable by
-an unauthenticated download, so `brew install`/`brew upgrade` need a GitHub token with read
-access to that repository, exported as `HOMEBREW_GITHUB_API_TOKEN`:
-
-```bash
-export HOMEBREW_GITHUB_API_TOKEN=<a token with read access to HoracioEspinosa/engram>
-brew install HoracioEspinosa/tap/engram
-```
-
-Without it, the formula fails fast with a message naming exactly this — it does not fail with an
-opaque `404`.
-
-If the tap itself is unreachable, or you would rather not authenticate Homebrew at all, download
-the binary directly and verify it against the release's own `checksums.txt` — see
-[the fork's README](https://github.com/HoracioEspinosa/engram#readme) and
-[docs/INSTALLATION.md](https://github.com/HoracioEspinosa/engram/blob/main/docs/INSTALLATION.md).
+`HoracioEspinosa/engram` is a public repository, so no GitHub token or authentication is needed
+to install or upgrade.
 
 ## Updating the formula for a new release
 
-The formula pins two things per architecture that a version bump alone does not fix: the
-numeric **GitHub asset id** of each `darwin` tarball (the download goes through the
-authenticated REST API's asset endpoint, since the repository is private — not the public
-`/releases/download/<tag>/<file>` URL) and that tarball's **sha256**, read from the release's own
-`checksums.txt`, never recomputed by hand.
+The formula's download URL is derived from `version` alone — the repository is public, so
+nothing needs resolving there. The one thing a version bump does not fix by itself is each
+architecture's **sha256**, read from the release's own `checksums.txt`, never recomputed by hand.
 
 `scripts/update-formula.sh` resolves both and rewrites `Formula/engram.rb`:
 
@@ -46,15 +30,15 @@ It prints a diff and the exact commands to test and commit — it does not commi
 Test the result before committing:
 
 ```bash
-HOMEBREW_GITHUB_API_TOKEN=$(gh auth token) brew install --verbose HoracioEspinosa/tap/engram
+brew install --verbose HoracioEspinosa/tap/engram
 ```
 
-Requires `gh`, authenticated with read access to `HoracioEspinosa/engram`.
+Requires only `curl`.
 
 ## Scope
 
 Only `darwin_arm64` and `darwin_amd64` are covered — that is the team's actual hardware today.
 The fork also publishes `linux_amd64`/`linux_arm64` tarballs; adding them to the formula is the
-same `on_linux` block pattern as `on_macos`/`on_arm`/`on_intel`, with their own asset ids and
-`checksums.txt` entries. `scripts/update-formula.sh` would need the corresponding filenames added
-before it could resolve them too.
+same `on_linux` block pattern as `on_macos`/`on_arm`/`on_intel`, with their own `checksums.txt`
+entries. `scripts/update-formula.sh` would need the corresponding filenames added before it could
+resolve them too.
